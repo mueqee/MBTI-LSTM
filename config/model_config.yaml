@@ -1,0 +1,166 @@
+# \u041a\u043e\u043d\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044f \u043c\u043e\u0434\u0435\u043b\u0438 \u0434\u043b\u044f \u043f\u0440\u043e\u0435\u043a\u0442\u0430 MBTI-LSTM
+
+# \u0410\u0440\u0445\u0438\u0442\u0435\u043a\u0442\u0443\u0440\u0430 \u043c\u043e\u0434\u0435\u043b\u0438
+model:
+  type: "lstm"  # \u041e\u043f\u0446\u0438\u0438: "lstm", "lstm_attention"
+  
+  # \u041a\u043e\u043d\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044f \u044d\u043c\u0431\u0435\u0434\u0434\u0438\u043d\u0433\u043e\u0432
+  embedding:
+    dim: 300
+    pretrained: null  # \u041f\u0443\u0442\u044c \u043a \u043f\u0440\u0435\u0434\u043e\u0431\u0443\u0447\u0435\u043d\u043d\u044b\u043c \u044d\u043c\u0431\u0435\u0434\u0434\u0438\u043d\u0433\u0430\u043c (Word2Vec/GloVe)
+    freeze: false
+    
+  # \u041a\u043e\u043d\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044f LSTM
+  lstm:
+    hidden_dim_1: 128
+    hidden_dim_2: 64
+    num_layers_1: 1
+    num_layers_2: 1
+    bidirectional: true
+    dropout: 0.2
+  
+  # \u041a\u043e\u043d\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044f \u0432\u044b\u0445\u043e\u0434\u043d\u043e\u0433\u043e \u0441\u043b\u043e\u044f
+  output:
+    num_classes: 4  # 4 \u0434\u0438\u0445\u043e\u0442\u043e\u043c\u0438\u0438: I/E, N/S, T/F, J/P
+    fc_hidden_dim: 64
+    activation: "sigmoid"
+
+# \u041a\u043e\u043d\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044f \u0441\u043b\u043e\u0432\u0430\u0440\u044f
+vocabulary:
+  max_vocab_size: 50000
+  min_freq: 2
+  special_tokens:
+    - "<PAD>"
+    - "<UNK>"
+
+# \u041e\u0431\u0440\u0430\u0431\u043e\u0442\u043a\u0430 \u0434\u0430\u043d\u043d\u044b\u0445
+data:
+  max_length: 500
+  text_column: "posts"
+  label_column: "type"
+  post_separator: "|||"
+  
+  # \u041f\u0440\u0435\u0434\u043e\u0431\u0440\u0430\u0431\u043e\u0442\u043a\u0430
+  preprocessing:
+    lowercase: true
+    remove_urls: true
+    remove_special_chars: true
+    remove_numbers: false
+    remove_stopwords: true
+    lemmatize: true
+    min_token_length: 2
+    max_token_length: 50
+    use_spacy: false
+
+# \u041a\u043e\u043d\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044f \u043e\u0431\u0443\u0447\u0435\u043d\u0438\u044f
+training:
+  # \u041e\u0441\u043d\u043e\u0432\u043d\u044b\u0435 \u043d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438
+  batch_size: 32
+  num_epochs: 50
+  learning_rate: 0.001
+  
+  # \u041e\u043f\u0442\u0438\u043c\u0438\u0437\u0430\u0442\u043e\u0440
+  optimizer:
+    name: "rmsprop"  # \u041e\u043f\u0446\u0438\u0438: "rmsprop", "adam", "adamw", "sgd"
+    # \u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 RMSprop (\u043b\u0443\u0447\u0448\u0438\u0435 \u043f\u043e \u0440\u0435\u0437\u0443\u043b\u044c\u0442\u0430\u0442\u0430\u043c \u0434\u0438\u0441\u0441\u0435\u0440\u0442\u0430\u0446\u0438\u0438)
+    rmsprop:
+      alpha: 0.99
+      eps: 1.0e-8
+      weight_decay: 0.0
+      momentum: 0.0
+    # \u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 Adam
+    adam:
+      betas: [0.9, 0.999]
+      eps: 1.0e-8
+      weight_decay: 0.0
+  
+  # \u0424\u0443\u043d\u043a\u0446\u0438\u044f \u043f\u043e\u0442\u0435\u0440\u044c
+  loss:
+    type: "bce"  # \u0411\u0438\u043d\u0430\u0440\u043d\u0430\u044f \u043a\u0440\u043e\u0441\u0441-\u044d\u043d\u0442\u0440\u043e\u043f\u0438\u044f \u0434\u043b\u044f \u043c\u043d\u043e\u0433\u043e\u043a\u043b\u0430\u0441\u0441\u043e\u0432\u043e\u0439 \u043a\u043b\u0430\u0441\u0441\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u0438
+    weighted: false  # \u0418\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u044c \u0432\u0437\u0432\u0435\u0448\u0435\u043d\u043d\u044b\u0435 \u043f\u043e\u0442\u0435\u0440\u0438 \u0434\u043b\u044f \u0434\u0438\u0441\u0431\u0430\u043b\u0430\u043d\u0441\u0430 \u043a\u043b\u0430\u0441\u0441\u043e\u0432
+  
+  # \u041f\u043b\u0430\u043d\u0438\u0440\u043e\u0432\u0449\u0438\u043a \u0441\u043a\u043e\u0440\u043e\u0441\u0442\u0438 \u043e\u0431\u0443\u0447\u0435\u043d\u0438\u044f
+  scheduler:
+    name: "plateau"  # \u041e\u043f\u0446\u0438\u0438: "plateau", "step", "cosine", null
+    plateau:
+      mode: "min"
+      factor: 0.5
+      patience: 3
+      min_lr: 1.0e-6
+    step:
+      step_size: 10
+      gamma: 0.1
+    cosine:
+      T_max: 50
+      eta_min: 1.0e-6
+  
+  # \u0420\u0435\u0433\u0443\u043b\u044f\u0440\u0438\u0437\u0430\u0446\u0438\u044f
+  gradient_clip: 1.0
+  early_stopping:
+    patience: 5
+    min_delta: 0.001
+  
+  # \u0420\u0430\u0437\u0434\u0435\u043b\u0435\u043d\u0438\u0435 \u0434\u0430\u043d\u043d\u044b\u0445
+  val_split: 0.15
+  test_split: 0.15
+  balance_classes: true
+  
+  # \u0421\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u0438\u0435 \u0447\u0435\u043a\u043f\u043e\u0439\u043d\u0442\u043e\u0432
+  checkpoint_dir: "checkpoints"
+  save_best_only: true
+  log_interval: 10
+
+# \u041e\u0446\u0435\u043d\u043a\u0430
+evaluation:
+  metrics:
+    - "accuracy"
+    - "precision"
+    - "recall"
+    - "f1_score"
+    - "roc_auc"
+    - "confusion_matrix"
+  
+  threshold: 0.5  # \u041f\u043e\u0440\u043e\u0433 \u0434\u043b\u044f \u0431\u0438\u043d\u0430\u0440\u043d\u043e\u0439 \u043a\u043b\u0430\u0441\u0441\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u0438
+
+# \u0418\u043d\u0444\u0435\u0440\u0435\u043d\u0441
+inference:
+  batch_size: 64
+  device: "auto"  # \u041e\u043f\u0446\u0438\u0438: "cuda", "cpu", "auto"
+
+# \u041f\u0443\u0442\u0438
+paths:
+  data_dir: "data/raw"
+  processed_data_dir: "data/processed"
+  model_dir: "models"
+  results_dir: "results"
+  logs_dir: "logs"
+
+# \u041e\u0442\u0441\u043b\u0435\u0436\u0438\u0432\u0430\u043d\u0438\u0435 \u044d\u043a\u0441\u043f\u0435\u0440\u0438\u043c\u0435\u043d\u0442\u043e\u0432 (MLflow)
+mlflow:
+  experiment_name: "mbti-lstm"
+  tracking_uri: "file:./experiments"
+  log_models: true
+  log_artifacts: true
+
+# \u0412\u043e\u0441\u043f\u0440\u043e\u0438\u0437\u0432\u043e\u0434\u0438\u043c\u043e\u0441\u0442\u044c
+seed: 42
+
+# \u041e\u0431\u043e\u0440\u0443\u0434\u043e\u0432\u0430\u043d\u0438\u0435
+hardware:
+  device: "auto"  # \u041e\u043f\u0446\u0438\u0438: "cuda", "cpu", "auto"
+  num_workers: 4
+  pin_memory: true
+  mixed_precision: false  # \u0418\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u044c \u0441\u043c\u0435\u0448\u0430\u043d\u043d\u0443\u044e \u0442\u043e\u0447\u043d\u043e\u0441\u0442\u044c (FP16)
+
+# \u041a\u043e\u043d\u0444\u0438\u0433\u0443\u0440\u0430\u0446\u0438\u044f \u0431\u0430\u0437\u043e\u0432\u044b\u0445 \u043c\u043e\u0434\u0435\u043b\u0435\u0439
+baseline:
+  naive_bayes:
+    max_features: 10000
+    ngram_range: [1, 2]
+    alpha: 1.0
+  
+  logistic_regression:
+    max_features: 10000
+    ngram_range: [1, 2]
+    C: 1.0
+    max_iter: 1000
