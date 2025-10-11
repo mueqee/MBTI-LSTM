@@ -199,7 +199,7 @@ MIT License - см. [LICENSE](LICENSE)
 ---
 
 - **GitHub**: [@mueqee](https://github.com/mueqee/MBTI-LSTM)
-- **ORCID & Google Scholar**: [СамойловаЛ] (https://researchid.co/s.liiilia) 
+- **ORCID & Google Scholar**: [СамойловаЛ](https://researchid.co/s.liiilia) 
 ---
 
 <p align="center">
